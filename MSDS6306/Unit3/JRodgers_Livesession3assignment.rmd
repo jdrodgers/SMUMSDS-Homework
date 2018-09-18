@@ -104,3 +104,6 @@ barplot(height = major_count$freq, names.arg = major_count$major_category, xlab=
 #d
 write.csv(df, file="./college_recent_grads.csv", row.names = FALSE)
 ```
+
+## 6
+https://github.com/jdrodgers/SMUMSDS-Homework

@@ -1,0 +1,106 @@
+---
+title: "MSDS6306 - HW3"
+author: "John Rodgers"
+date: "September 17, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 1
+
+```{r github-cloning, echo = TRUE}
+## mkdir HW3-GitClone
+## cd HW3-GitClone
+## git clone https://github.com/caesar0301/awesome-public-datasets
+```
+
+## 2
+
+### a
+```{r data-summary-a, echo = TRUE}
+setwd("./HW3-GitClone/awesome-public-datasets/Datasets")
+df <- read.csv("titanic.csv")
+```
+
+### b
+```{r data-summary-b, echo=TRUE}
+sum(df$Sex == "female")
+
+```
+
+### c
+```{r data-summary-c, echo= TRUE}
+
+```
+
+## 3
+
+
+```{r function-building, echo=TRUE}
+get.sleep.data <- function(x){
+  # a
+  sleep.data <- read.csv(x)
+  med.age <- median(sleep.data$Age, na.rm = TRUE)
+  min.sleep.dur <- min(sleep.data$Duration, na.rm=TRUE)
+  max.sleep.dur <- max(sleep.data$Duration, na.rm=TRUE)
+  mean.RSES <- mean(sleep.data$RSES, na.rm=TRUE)
+  sd.RSES <- sd(sleep.data$RSES, na.rm=TRUE)
+ 
+  # b
+  report <- data.frame(med.age, mean.RSES/5, sd.RSES/5, max.sleep.dur - min.sleep.dur)
+ 
+  # c
+  colnames(report) <- c("MedianAge","SelfEsteem","SE_SD","DurationRange")
+ 
+  #d
+  round(report,2)
+  
+}
+
+# e
+get.sleep.data("sleep_data_01.csv")
+
+```
+
+## 4
+
+```{r FiveThirtyEightData, echo=TRUE}
+#a
+#assumed pre-install of fivethirtyeight package
+#install.packages("fivethirtyeight")
+library(fivethirtyeight)
+
+#b
+df <- data.frame(college_recent_grads)
+
+#c
+#http://fivethirtyeight.com/features/the-economic-guide-to-picking-a-college-major/
+
+#d
+dim(df)
+
+```
+
+## 5
+
+```{r data-summary}
+#a
+colnames(df)
+ncol(df)
+
+#b
+#assumed pre-install of plyr package
+#install.packages("plyr")
+library(plyr)
+major_count <- count(df, vars="major_category")
+
+#c
+par(las=2)
+barplot(height = major_count$freq, names.arg = major_count$major_category, xlab="Major Categories", ylab="Frequency", main = "Major Categories for College Majors of Recent Graduates", col=2, horiz=TRUE)
+
+#d
+write.csv(df, file="./college_recent_grads.csv", row.names = FALSE)
+```

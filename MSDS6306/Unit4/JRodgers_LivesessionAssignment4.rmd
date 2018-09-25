@@ -1,0 +1,92 @@
+---
+title: "MSDS6306 - Live Session Assignment 4"
+author: "John Rodgers"
+date: "September 25, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Session Info
+
+```{r sessionInfo, echo = TRUE}
+sessionInfo()
+```
+
+# Required Libraries
+
+```{r required-libraries, echo = TRUE}
+## Web Scraping
+#install.packages("htmltab")
+library(htmltab)
+## String Manipulation (name parsing)
+#install.packages("stringr")
+library(stringr)
+## Barplot creation
+#install.packages("ggplot2")
+library(ggplot2)
+```
+
+# 1. Harry Potter Cast
+
+```{r HarryPotterCast, echo=TRUE}
+# URL of IMDB Page for Harry Potter and the Deathly Hallows: Part 2
+hp.url <- "https://www.imdb.com/title/tt1201607/fullcredits?ref_=tt_ql_1"
+# Insert table content into new dataframe
+## XPath to table extracted from source via Chrome
+imdb <- htmltab(doc=hp.url, which = "//*[@id='fullcredits_content']/table[3]")
+# Remove variable V3 (Column containing "...")
+imdb$V3 <- NULL
+# create vector to be assigned as column names
+columns <- c("Actor", "Character")
+# assign column names to dataframe
+colnames(imdb) <- columns
+# Change character encoding for the Actor Names
+Encoding(imdb$Actor) <- "UTF-8"
+# replace value for Character when Actor = Warwick Davis
+imdb$Character[imdb$Actor == 'Warwick Davis'] <- "Griphook / Professor Filius Flitwick"
+# filter out row containing "Rest of cast listed alphabetically"
+imdb <- imdb[-which(imdb$Actor == 'Rest of cast listed alphabetically:'),]
+# Extract First Name
+imdb$ActorFirstName <- word(imdb$Actor, 1, -2)
+# Extract Last Name
+imdb$ActorSurName <- word(imdb$Actor, -1)
+# Remove full Name variable
+imdb$Actor <- NULL
+# Reorder columns (ActorFirstName, ActorSurName, Character)
+imdb <- imdb[c(2,3,1)]
+# Return first 10 rows
+imdb[1:10,]
+```
+
+
+# 2. SportsBall
+
+```{r SportsBall, echo=TRUE}
+# create variable with URL
+spurs.url <- "http://www.espn.com/nba/team/stats/_/name/sa/san-antonio-spurs"
+# use htmltab to extract Statistics Table with XPath
+spurs <- htmltab(doc=spurs.url, which = "//*[@id='my-players-table']/div[4]/div[3]/table")
+# Assign Row 1 values as column headers
+colnames(spurs) <- spurs[1,]
+# Delete row containing column headers
+spurs <- spurs[-1,]
+# Remove Totals row
+spurs <- spurs[-which(spurs$PLAYER == 'Totals'),]
+# Move player position to own variable
+spurs$Position <- str_extract(spurs$PLAYER, '[^, ]+$')
+# Remove player position (and comma) from PLAYER variable
+spurs$PLAYER <- str_extract(spurs$PLAYER, '.+?(?=,)')
+# Reorder columns (Move position after player name)
+spurs <- spurs[c(1,16,2:15)]
+# display structure (pre-numeric conversion)
+str(spurs)
+# Convert numeric values stored as characters to numeric
+spurs[3:16] <- lapply(spurs[3:16],as.numeric)
+# display structure (post-numeric conversion)
+str(spurs)
+# bar plot of field goal percentage
+ggplot(data = spurs, aes(x=PLAYER, y=spurs$`FG%`, fill=spurs$Position)) + coord_flip() + geom_bar(stat="identity") + labs(title = "2017-18 Spurs Field Goal %", x = "Spurs Player", y = "Field Goal %", fill="Position") + theme(plot.title = element_text(hjust = 0.5))
+```

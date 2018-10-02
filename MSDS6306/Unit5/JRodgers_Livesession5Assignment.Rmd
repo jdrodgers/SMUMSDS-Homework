@@ -1,0 +1,53 @@
+---
+title: "MSDS6306 - Unit 5 Homework"
+author: "John Rodgers"
+date: "October 1, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Problem 1 - Data Munging
+
+```{r data-munging, echo=TRUE}
+#Load 2016 baby name data into dataframe 'df'
+df <- read.csv("yob2016.txt",header=FALSE, sep=";", col.names=c("first.name","gender","amount.2016"))
+#Review structure summary of df
+str(df)
+#Identify duplicated name in data that ends in 'yyy'
+df[grep("yyy",df$first.name),]
+#Remove duplicated name from dataframe and store in dataframe 'y2016'
+y2016 <- df[which(df$first.name != "Fionayyy"),]
+```
+
+# Problem 2 - Data Merging
+
+```{r data-merging-1, echo=TRUE}
+#Load 2015 baby name data into dataframe 'y2015'
+y2015 <- read.csv("yob2015.txt",header=FALSE, sep=",", col.names=c("first.name","gender","amount.2015"))
+#Display last 10 lines of y2015 data
+tail(y2015,10)
+```
+
+The last 10 rows of data is interesting because all of the names are males and the amounts of each is 5.
+
+```{r data-merging-2, echo=TRUE}
+#Merge y2015 and y2016 based on first.name and gender
+final <- merge(y2015, y2016, by.x = c("first.name", "gender"), by.y = c("first.name", "gender"))
+```
+
+# Problem 3
+
+```{r data-summary, echo=TRUE}
+#Create new column that is the combined total for 2015 and 2016 for each name
+final$total <- final$amount.2015 + final$amount.2016
+#Sort names by total amount descending
+final <- final[order(-final$total),]
+#Display top 10 names by total
+head(final,10)
+```
+
+# Problem 4
+Git Repository: https://github.com/jdrodgers/SMUMSDS-Homework/tree/master/MSDS6306/Unit5
